@@ -1,0 +1,19 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Building image'
+  args: [ 'build', '-t', 'us-central1-docker.pkg.dev/cloud-build-study/quickstart-docker-repo/my-flask-app:${BUILD_ID}', '.' ]
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Building test image'
+  args: [ 'build', '-f', 'Dockerfile.test', '-t', 'us-central1-docker.pkg.dev/cloud-build-study/quickstart-docker-repo/my-flask-app-test:${BUILD_ID}', '.' ]
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Testing'
+  args: [ 'run', '--rm', 'us-central1-docker.pkg.dev/cloud-build-study/quickstart-docker-repo/my-flask-app-test:${BUILD_ID}']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'us-central1-docker.pkg.dev/cloud-build-study/quickstart-docker-repo/my-flask-app:${BUILD_ID}']
+- name: "gcr.io/cloud-builders/gke-deploy"
+  args:
+  - run
+  - --filename=kubernetes/
+  - --image=us-central1-docker.pkg.dev/cloud-build-study/quickstart-docker-repo/my-flask-app:${BUILD_ID}
+  - --location=southamerica-east1-a
+  - --cluster=my-app-cluster

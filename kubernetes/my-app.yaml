@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "my-app"
+  template:
+    metadata:
+      labels:
+        app: my-app
+        track: stable
+    spec:
+      containers:
+        - name: my-app
+          image: "us-central1-docker.pkg.dev/cloud-build-study/quickstart-docker-repo/my-flask-app:tag2"
+          ports:
+            - name: http
+              containerPort: 5000
+            - name: health
+              containerPort: 5000
+          resources:
+            limits:
+              cpu: 0.2
+              memory: "100Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
